@@ -1,9 +1,6 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import {
-  buildRobotsTxt,
-  buildSitemapXml,
-  filterAndCompactRepos,
-} from "../scripts/build-site.ts";
+import { filterAndCompactRepos } from "../scripts/build-index.ts";
+import { buildRobotsTxt, buildSitemapXml } from "../scripts/build-site.ts";
 
 Deno.test("filterAndCompactRepos excludes infra repos and sorts by slug", () => {
   const result = filterAndCompactRepos([
@@ -52,5 +49,8 @@ Deno.test("buildSitemapXml and buildRobotsTxt generate valid SEO files", () => {
   assertStringIncludes(sitemap, "<lastmod>2026-11-26</lastmod>");
 
   const robots = buildRobotsTxt("https://wpplugins.github.io");
-  assertStringIncludes(robots, "Sitemap: https://wpplugins.github.io/sitemap.xml");
+  assertStringIncludes(
+    robots,
+    "Sitemap: https://wpplugins.github.io/sitemap.xml",
+  );
 });

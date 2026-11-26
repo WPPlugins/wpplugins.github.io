@@ -9,7 +9,8 @@
     "@std/path": "jsr:@std/path@^1.0.8"
   },
   "tasks": {
-    "build": "deno run --allow-net --allow-read --allow-write --allow-env scripts/build-site.ts",
+    "index": "deno run --allow-net --allow-read --allow-write --allow-env scripts/build-index.ts",
+    "build": "deno run --allow-read --allow-write scripts/build-site.ts",
     "check": "deno check scripts/**/*.ts",
     "test": "deno test --allow-read --allow-write tests/"
   }

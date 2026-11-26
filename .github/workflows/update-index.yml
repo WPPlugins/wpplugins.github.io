@@ -1,0 +1,52 @@
+name: Update Plugin Index
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build-index.ts"
+      - ".github/workflows/update-index.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: wpplugins-index
+  cancel-in-progress: true
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Build plugin index
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: deno task index --out _data_branch
+
+      - name: Publish index to orphan data branch
+        run: |
+          cd _data_branch
+          git init -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add plugins.json stats.json
+          git commit -m "chore(index): refresh WPPlugins index"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git push --force origin data
+
+      - name: Trigger GitHub Pages redeploy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml -R "${{ github.repository }}"

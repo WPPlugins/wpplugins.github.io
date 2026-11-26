@@ -1,3 +1,5 @@
 dist/
+data-out/
+_data_branch/
 .DS_Store
 Thumbs.db

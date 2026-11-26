@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WPPlugins — WordPress.org SVN-to-GitHub Plugin Mirror</title>
-  <meta
-    name="description"
-    content="Search 17,900+ mirrored WordPress.org plugins on GitHub. Copy-paste Windows, macOS, and Linux commands for git clone, git submodule, tag pinning, and Composer."
-  />
-  <link rel="canonical" href="https://wpplugins.github.io/" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="WPPlugins — WordPress.org SVN-to-GitHub Mirror" />
-  <meta
-    property="og:description"
-    content="Search 17,900+ WordPress.org plugins mirrored to GitHub with OS-specific git clone, submodule, and Composer commands."
-  />
-  <meta property="og:url" content="https://wpplugins.github.io/" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="WPPlugins — WordPress.org SVN-to-GitHub Mirror" />
-  <meta
-    name="twitter:description"
-    content="Search 17,900+ WordPress.org plugins mirrored to GitHub."
-  />
-  <link rel="stylesheet" href="./styles.css" />
-  <script type="application/ld+json">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WPPlugins — WordPress.org SVN-to-GitHub Plugin Mirror</title>
+    <meta
+      name="description"
+      content="Search 17,900+ mirrored WordPress.org plugins on GitHub. Copy-paste Windows, macOS, and Linux commands for git clone, git submodule, tag pinning, and Composer."
+    />
+    <link rel="canonical" href="https://wpplugins.github.io/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title"
+      content="WPPlugins — WordPress.org SVN-to-GitHub Mirror" />
+    <meta
+      property="og:description"
+      content="Search 17,900+ WordPress.org plugins mirrored to GitHub with OS-specific git clone, submodule, and Composer commands."
+    />
+    <meta property="og:url" content="https://wpplugins.github.io/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title"
+      content="WPPlugins — WordPress.org SVN-to-GitHub Mirror" />
+    <meta
+      name="twitter:description"
+      content="Search 17,900+ WordPress.org plugins mirrored to GitHub."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -36,229 +38,251 @@
         "query-input": "required name=search_term_string"
       }
     }
-  </script>
-</head>
-<body>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <a class="brand" href="https://github.com/WPPlugins" target="_blank" rel="noopener">
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="brand" href="https://github.com/WPPlugins" target="_blank"
+          rel="noopener">
         <span class="brand-dot" aria-hidden="true"></span>
         WPPlugins
       </a>
-      <nav class="nav-links" aria-label="Primary">
-        <a href="#lookup">Lookup</a>
-        <a href="#guides">Submodule Guide</a>
-        <a href="#composer">Composer</a>
-        <a href="https://github.com/WPPlugins/mirror-orchestrator" target="_blank" rel="noopener">
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#lookup">Lookup</a>
+          <a href="#guides">Submodule Guide</a>
+          <a href="#composer">Composer</a>
+          <a href="https://github.com/WPPlugins/mirror-orchestrator"
+            target="_blank" rel="noopener">
           Orchestrator ↗
         </a>
-      </nav>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="container hero-inner">
-      <div class="badge-row">
-        <span class="pill pill-accent" id="stats-bar">Loading plugin index…</span>
-        <span class="pill">SVN → Git</span>
-        <span class="pill">Updated every 2h</span>
+        </nav>
       </div>
-      <h1>WordPress.org Plugins, Ready for Git.</h1>
-      <p class="subtitle">
+    </header>
+
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="badge-row">
+          <span class="pill pill-accent"
+            id="stats-bar">Loading plugin index…</span>
+          <span class="pill">SVN → Git</span>
+          <span class="pill">Updated every 2h</span>
+        </div>
+        <h1>WordPress.org Plugins, Ready for Git.</h1>
+        <p class="subtitle">
         Browse mirrored WordPress.org plugins on GitHub and grab ready-to-run commands for
         <strong>Windows</strong>, <strong>macOS</strong>, and <strong>Linux</strong>.
       </p>
 
-      <div class="os-bar" aria-label="Operating system selector">
-        <span class="os-label">
+        <div class="os-bar" aria-label="Operating system selector">
+          <span class="os-label">
           Platform
           <span id="os-detected-badge" class="os-detected" title="Auto-detected from your browser">auto</span>
         </span>
-        <div class="os-tabs" role="tablist" aria-label="Operating System">
-          <button class="os-tab" role="tab" type="button" data-os="windows" aria-selected="false">
+          <div class="os-tabs" role="tablist" aria-label="Operating System">
+            <button class="os-tab" role="tab" type="button" data-os="windows"
+              aria-selected="false">
             Windows <span class="os-shell">(PowerShell)</span>
           </button>
-          <button class="os-tab" role="tab" type="button" data-os="macos" aria-selected="false">
+            <button class="os-tab" role="tab" type="button" data-os="macos"
+              aria-selected="false">
             macOS <span class="os-shell">(zsh)</span>
           </button>
-          <button class="os-tab" role="tab" type="button" data-os="linux" aria-selected="false">
+            <button class="os-tab" role="tab" type="button" data-os="linux"
+              aria-selected="false">
             Linux <span class="os-shell">(bash)</span>
           </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <main class="container main-content">
-    <section id="lookup" class="card card-elevated">
-      <div class="section-head">
-        <div>
-          <h2>Plugin Command Generator</h2>
-          <p class="muted">
-            Search the live index or type any WordPress.org plugin slug to customize every command below.
-          </p>
-        </div>
-      </div>
-
-      <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-        </svg>
-        <input
-          id="search-input"
-          type="search"
-          placeholder="Search plugins (e.g. akismet, woocommerce, contact-form-7)…"
-          autocomplete="off"
-          aria-label="Search WordPress plugin slug"
-        />
-      </div>
-
-      <ul id="results-list" class="results-list" aria-live="polite"></ul>
-
-      <div id="selected-panel" class="selected-panel">
-        <div class="selected-header">
-          <div>
-            <div class="selected-title-row">
-              <h3 id="selected-title">akismet</h3>
-              <span class="slug-badge" id="selected-branch">main</span>
-            </div>
-            <p id="selected-desc" class="muted">
-              Select a plugin above or type any slug to generate platform-specific commands.
-            </p>
           </div>
-          <div class="selected-links">
-            <a class="btn-link" id="link-github" href="https://github.com/WPPlugins/akismet" target="_blank" rel="noopener">
-              GitHub Repo ↗
-            </a>
-            <a class="btn-link" id="link-wporg" href="https://wordpress.org/plugins/akismet/" target="_blank" rel="noopener">
-              WordPress.org ↗
-            </a>
-          </div>
-        </div>
-
-        <div class="snippets-grid">
-          <div class="snippet">
-            <div class="snippet-head">
-              <span>Clone Repository</span>
-              <button class="copy-btn" data-target="cmd-clone" type="button">Copy</button>
-            </div>
-            <pre><code id="cmd-clone"></code></pre>
-          </div>
-
-          <div class="snippet">
-            <div class="snippet-head">
-              <span>Add as Git Submodule</span>
-              <button class="copy-btn" data-target="cmd-submodule" type="button">Copy</button>
-            </div>
-            <pre><code id="cmd-submodule"></code></pre>
-          </div>
-
-          <div class="snippet">
-            <div class="snippet-head">
-              <span>Pin to Latest Release Tag</span>
-              <button class="copy-btn" data-target="cmd-tag" type="button">Copy</button>
-            </div>
-            <pre><code id="cmd-tag"></code></pre>
-          </div>
-
-          <div class="snippet">
-            <div class="snippet-head">
-              <span>Update Submodule</span>
-              <button class="copy-btn" data-target="cmd-update" type="button">Copy</button>
-            </div>
-            <pre><code id="cmd-update"></code></pre>
-          </div>
-        </div>
-
-        <div class="snippet snippet-full">
-          <div class="snippet-head">
-            <span>Composer VCS Repository (<code>composer.json</code>)</span>
-            <button class="copy-btn" data-target="cmd-composer" type="button">Copy</button>
-          </div>
-          <pre><code id="cmd-composer"></code></pre>
         </div>
       </div>
     </section>
 
-    <section id="guides" class="card">
-      <div class="section-head">
-        <div>
-          <h2>Developer Guide: Git &amp; Submodules</h2>
-          <p class="muted">
+    <main class="container main-content">
+      <section id="lookup" class="card card-elevated">
+        <div class="section-head">
+          <div>
+            <h2>Plugin Command Generator</h2>
+            <p class="muted">
+            Search the live index or type any WordPress.org plugin slug to customize every command below.
+          </p>
+          </div>
+        </div>
+
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor"
+            aria-hidden="true">
+            <path fill-rule="evenodd"
+              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+              clip-rule="evenodd" />
+          </svg>
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Search plugins (e.g. akismet, woocommerce, contact-form-7)…"
+            autocomplete="off"
+            aria-label="Search WordPress plugin slug"
+          />
+        </div>
+
+        <ul id="results-list" class="results-list" aria-live="polite"></ul>
+
+        <div id="selected-panel" class="selected-panel">
+          <div class="selected-header">
+            <div>
+              <div class="selected-title-row">
+                <h3 id="selected-title">akismet</h3>
+                <span class="slug-badge" id="selected-branch">main</span>
+              </div>
+              <p id="selected-desc" class="muted">
+              Select a plugin above or type any slug to generate platform-specific commands.
+            </p>
+            </div>
+            <div class="selected-links">
+              <a class="btn-link" id="link-github"
+                href="https://github.com/WPPlugins/akismet" target="_blank"
+                rel="noopener">
+              GitHub Repo ↗
+            </a>
+              <a class="btn-link" id="link-wporg"
+                href="https://wordpress.org/plugins/akismet/" target="_blank"
+                rel="noopener">
+              WordPress.org ↗
+            </a>
+            </div>
+          </div>
+
+          <div class="snippets-grid">
+            <div class="snippet">
+              <div class="snippet-head">
+                <span>Clone Repository</span>
+                <button class="copy-btn" data-target="cmd-clone"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="cmd-clone"></code></pre>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-head">
+                <span>Add as Git Submodule</span>
+                <button class="copy-btn" data-target="cmd-submodule"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="cmd-submodule"></code></pre>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-head">
+                <span>Pin to Latest Release Tag</span>
+                <button class="copy-btn" data-target="cmd-tag"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="cmd-tag"></code></pre>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-head">
+                <span>Update Submodule</span>
+                <button class="copy-btn" data-target="cmd-update"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="cmd-update"></code></pre>
+            </div>
+          </div>
+
+          <div class="snippet snippet-full">
+            <div class="snippet-head">
+              <span>Composer VCS Repository (<code>composer.json</code>)</span>
+              <button class="copy-btn" data-target="cmd-composer"
+                type="button">Copy</button>
+            </div>
+            <pre><code id="cmd-composer"></code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="guides" class="card">
+        <div class="section-head">
+          <div>
+            <h2>Developer Guide: Git &amp; Submodules</h2>
+            <p class="muted">
             Commands below automatically adapt to the selected platform tab above.
           </p>
+          </div>
         </div>
-      </div>
 
-      <div class="guide-grid">
-        <article class="guide-block">
-          <h3>1. Initialize &amp; Add a Plugin Submodule</h3>
-          <p class="muted">
+        <div class="guide-grid">
+          <article class="guide-block">
+            <h3>1. Initialize &amp; Add a Plugin Submodule</h3>
+            <p class="muted">
             Keep third-party plugin code out of your main Git history while locking exact versions.
           </p>
-          <div class="snippet">
-            <div class="snippet-head">
-              <span class="guide-os-label">Shell</span>
-              <button class="copy-btn" data-target="guide-add" type="button">Copy</button>
+            <div class="snippet">
+              <div class="snippet-head">
+                <span class="guide-os-label">Shell</span>
+                <button class="copy-btn" data-target="guide-add"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="guide-add"></code></pre>
             </div>
-            <pre><code id="guide-add"></code></pre>
-          </div>
-        </article>
+          </article>
 
-        <article class="guide-block">
-          <h3>2. Clone a Project with Submodules</h3>
-          <p class="muted">
+          <article class="guide-block">
+            <h3>2. Clone a Project with Submodules</h3>
+            <p class="muted">
             Pull your WordPress repository along with all pinned plugin submodules in one step.
           </p>
-          <div class="snippet">
-            <div class="snippet-head">
-              <span class="guide-os-label">Shell</span>
-              <button class="copy-btn" data-target="guide-clone" type="button">Copy</button>
+            <div class="snippet">
+              <div class="snippet-head">
+                <span class="guide-os-label">Shell</span>
+                <button class="copy-btn" data-target="guide-clone"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="guide-clone"></code></pre>
             </div>
-            <pre><code id="guide-clone"></code></pre>
-          </div>
-        </article>
+          </article>
 
-        <article class="guide-block">
-          <h3>3. Switch a Submodule to a Specific Release Tag</h3>
-          <p class="muted">
+          <article class="guide-block">
+            <h3>3. Switch a Submodule to a Specific Release Tag</h3>
+            <p class="muted">
             Pin production deployments to an immutable WordPress.org release tag instead of tracking <code>trunk</code>.
           </p>
-          <div class="snippet">
-            <div class="snippet-head">
-              <span class="guide-os-label">Shell</span>
-              <button class="copy-btn" data-target="guide-pin" type="button">Copy</button>
+            <div class="snippet">
+              <div class="snippet-head">
+                <span class="guide-os-label">Shell</span>
+                <button class="copy-btn" data-target="guide-pin"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="guide-pin"></code></pre>
             </div>
-            <pre><code id="guide-pin"></code></pre>
-          </div>
-        </article>
+          </article>
 
-        <article id="composer" class="guide-block">
-          <h3>4. Composer &amp; Prerequisites</h3>
-          <p class="muted">
+          <article id="composer" class="guide-block">
+            <h3>4. Composer &amp; Prerequisites</h3>
+            <p class="muted">
             Quickly install <code>git</code> on your machine if missing, or pair mirrors with
             <a href="https://wpackagist.org/" target="_blank" rel="noopener">WPackagist</a> for Composer-managed sites.
           </p>
-          <div class="snippet">
-            <div class="snippet-head">
-              <span class="guide-os-label">Install Git</span>
-              <button class="copy-btn" data-target="guide-install" type="button">Copy</button>
+            <div class="snippet">
+              <div class="snippet-head">
+                <span class="guide-os-label">Install Git</span>
+                <button class="copy-btn" data-target="guide-install"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="guide-install"></code></pre>
             </div>
-            <pre><code id="guide-install"></code></pre>
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
+          </article>
+        </div>
+      </section>
+    </main>
 
-  <footer class="footer container">
-    <p>
+    <footer class="footer container">
+      <p>
       Read-only mirrors maintained by
       <a href="https://github.com/WPPlugins/mirror-orchestrator" target="_blank" rel="noopener">WPPlugins/mirror-orchestrator</a>
       · Index updates every 2 hours.
     </p>
-  </footer>
+    </footer>
 
-  <script src="./app.js" defer></script>
-</body>
+    <script src="./app.js" defer></script>
+  </body>
 </html>

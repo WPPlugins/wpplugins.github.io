@@ -23,7 +23,9 @@
   const guideClone = document.getElementById("guide-clone");
   const guidePin = document.getElementById("guide-pin");
   const guideInstall = document.getElementById("guide-install");
-  const guideOsLabels = Array.from(document.querySelectorAll(".guide-os-label"));
+  const guideOsLabels = Array.from(
+    document.querySelectorAll(".guide-os-label"),
+  );
 
   let plugins = [];
   let currentSlug = "akismet";
@@ -51,37 +53,31 @@
     return { os: "linux", source: "auto" };
   }
 
-  function buildPlatformCommands(slug, branch, os) {
+  function buildPlatformCommands(slug, _branch, os) {
     const repoUrl = `https://github.com/WPPlugins/${slug}.git`;
 
     if (os === "windows") {
       return {
         label: "PowerShell",
         clone: `git clone ${repoUrl}`,
-        submodule:
-          `git submodule add ${repoUrl} wp-content/plugins/${slug}\n` +
+        submodule: `git submodule add ${repoUrl} wp-content/plugins/${slug}\n` +
           `git commit -m "chore: add ${slug} plugin submodule"`,
-        tag:
-          `Push-Location wp-content\\plugins\\${slug}\n` +
+        tag: `Push-Location wp-content\\plugins\\${slug}\n` +
           `git fetch --tags; if ($?) { $tag = git describe --tags --abbrev=0; git checkout $tag }\n` +
           `Pop-Location`,
         update:
           `git submodule update --remote --merge wp-content/plugins/${slug}`,
-        guideAdd:
-          `# From your WordPress project root (PowerShell):\n` +
+        guideAdd: `# From your WordPress project root (PowerShell):\n` +
           `git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug>\n` +
           `git commit -m "chore: add <slug> plugin submodule"`,
-        guideClone:
-          `git clone --recurse-submodules <your-project-repo-url>\n` +
+        guideClone: `git clone --recurse-submodules <your-project-repo-url>\n` +
           `# Or if already cloned:\n` +
           `git submodule update --init --recursive`,
-        guidePin:
-          `Push-Location wp-content\\plugins\\<slug>\n` +
+        guidePin: `Push-Location wp-content\\plugins\\<slug>\n` +
           `git fetch --tags; git checkout 1.2.3\n` +
           `Pop-Location\n` +
           `git add wp-content/plugins/<slug>; git commit -m "chore: bump <slug> to 1.2.3"`,
-        guideInstall:
-          `# Windows (winget):\n` +
+        guideInstall: `# Windows (winget):\n` +
           `winget install --id Git.Git -e --source winget`,
       };
     }
@@ -97,20 +93,17 @@
           `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout "$(git describe --tags --abbrev=0)")`,
         update:
           `git submodule update --remote --merge wp-content/plugins/${slug}`,
-        guideAdd:
-          `# From your WordPress project root (zsh/bash):\n` +
+        guideAdd: `# From your WordPress project root (zsh/bash):\n` +
           `git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug> && \\\n` +
           `  git commit -m "chore: add <slug> plugin submodule"`,
-        guideClone:
-          `git clone --recurse-submodules <your-project-repo-url>\n` +
+        guideClone: `git clone --recurse-submodules <your-project-repo-url>\n` +
           `# Or if already cloned:\n` +
           `git submodule update --init --recursive`,
         guidePin:
           `(cd wp-content/plugins/<slug> && git fetch --tags && git checkout 1.2.3) && \\\n` +
           `  git add wp-content/plugins/<slug> && \\\n` +
           `  git commit -m "chore: bump <slug> to 1.2.3"`,
-        guideInstall:
-          `# macOS (Xcode CLT or Homebrew):\n` +
+        guideInstall: `# macOS (Xcode CLT or Homebrew):\n` +
           `xcode-select --install\n` +
           `# or: brew install git`,
       };
@@ -127,20 +120,17 @@
         `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout "$(git describe --tags --abbrev=0)")`,
       update:
         `git submodule update --remote --merge wp-content/plugins/${slug}`,
-      guideAdd:
-        `# From your WordPress project root (bash):\n` +
+      guideAdd: `# From your WordPress project root (bash):\n` +
         `git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug> && \\\n` +
         `  git commit -m "chore: add <slug> plugin submodule"`,
-      guideClone:
-        `git clone --recurse-submodules <your-project-repo-url>\n` +
+      guideClone: `git clone --recurse-submodules <your-project-repo-url>\n` +
         `# Or if already cloned:\n` +
         `git submodule update --init --recursive`,
       guidePin:
         `(cd wp-content/plugins/<slug> && git fetch --tags && git checkout 1.2.3) && \\\n` +
         `  git add wp-content/plugins/<slug> && \\\n` +
         `  git commit -m "chore: bump <slug> to 1.2.3"`,
-      guideInstall:
-        `# Debian/Ubuntu:\n` +
+      guideInstall: `# Debian/Ubuntu:\n` +
         `sudo apt-get update && sudo apt-get install -y git\n` +
         `# Fedora/RHEL:\n` +
         `sudo dnf install -y git`,
@@ -199,16 +189,16 @@
 
     selectedTitle.textContent = cleanSlug;
     selectedBranch.textContent = currentBranch;
-    selectedDesc.textContent =
-      description || `WordPress.org mirror repository for ${cleanSlug}`;
+    selectedDesc.textContent = description ||
+      `WordPress.org mirror repository for ${cleanSlug}`;
     linkGithub.href = `https://github.com/WPPlugins/${cleanSlug}`;
     linkWporg.href = `https://wordpress.org/plugins/${cleanSlug}/`;
 
     renderCommands();
 
-    const url = new URL(window.location.href);
+    const url = new URL(globalThis.location.href);
     url.searchParams.set("plugin", cleanSlug);
-    window.history.replaceState({}, "", url);
+    globalThis.history.replaceState({}, "", url);
   }
 
   function renderResults(query) {
@@ -301,7 +291,8 @@
       ]);
       if (statsRes.ok) {
         const stats = await statsRes.json();
-        statsBar.textContent = `${stats.total_plugins.toLocaleString()} mirrored plugins`;
+        statsBar.textContent =
+          `${stats.total_plugins.toLocaleString()} mirrored plugins`;
       }
       if (pluginsRes.ok) {
         plugins = await pluginsRes.json();
@@ -310,7 +301,9 @@
       statsBar.textContent = "17,900+ mirrored plugins";
     }
 
-    const initialSlug = new URLSearchParams(window.location.search).get("plugin");
+    const initialSlug = new URLSearchParams(globalThis.location.search).get(
+      "plugin",
+    );
     if (initialSlug) {
       searchInput.value = initialSlug;
       const found = plugins.find((p) => p.s === initialSlug.toLowerCase());

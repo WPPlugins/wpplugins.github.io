@@ -1,47 +1,6 @@
 import { parseArgs } from "@std/cli";
-import { copy, ensureDir } from "@std/fs";
+import { copy, ensureDir, exists } from "@std/fs";
 import { join } from "@std/path";
-
-export interface GitHubRepoSummary {
-  name: string;
-  description: string | null;
-  pushed_at: string;
-  default_branch: string;
-}
-
-/** Compact tuple-like record to minimize JSON payload size for ~18k+ plugins. */
-export interface CompactPluginEntry {
-  /** Slug / repo name */
-  s: string;
-  /** Short description */
-  d: string;
-  /** Last pushed ISO timestamp (date prefix or full ISO) */
-  p: string;
-  /** Default branch (main or master) */
-  b: string;
-}
-
-const EXCLUDED_REPOS = new Set([
-  ".github",
-  "mirror-orchestrator",
-  "wpplugins.github.io",
-]);
-
-const GITHUB_API = "https://api.github.com";
-
-export function filterAndCompactRepos(
-  repos: ReadonlyArray<GitHubRepoSummary>,
-): CompactPluginEntry[] {
-  return repos
-    .filter((r) => Boolean(r.name) && !EXCLUDED_REPOS.has(r.name))
-    .map((r) => ({
-      s: r.name,
-      d: (r.description ?? "").slice(0, 200),
-      p: r.pushed_at ? r.pushed_at.slice(0, 10) : "",
-      b: r.default_branch || "main",
-    }))
-    .sort((a, b) => a.s.localeCompare(b.s));
-}
 
 export function buildSitemapXml(
   baseUrl: string,
@@ -68,125 +27,64 @@ Sitemap: ${baseUrl}/sitemap.xml
 `;
 }
 
-async function fetchPageWithRetry(
-  org: string,
-  page: number,
-  headers: Record<string, string>,
-): Promise<GitHubRepoSummary[]> {
-  const url = `${GITHUB_API}/orgs/${
-    encodeURIComponent(org)
-  }/repos?type=public&per_page=100&page=${page}`;
-
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const resp = await fetch(url, { headers });
-    if (resp.ok) {
-      return (await resp.json()) as GitHubRepoSummary[];
-    }
-    if (resp.status === 403 || resp.status === 429 || resp.status >= 500) {
-      const waitMs = 1000 * 2 ** attempt;
-      console.warn(
-        `[build] HTTP ${resp.status} on page ${page}; retrying in ${waitMs}ms...`,
-      );
-      await new Promise((r) => setTimeout(r, waitMs));
-      continue;
-    }
-    throw new Error(`GitHub API failed (${resp.status}): ${await resp.text()}`);
-  }
-
-  throw new Error(`Failed to fetch page ${page} after retries.`);
-}
-
-async function fetchOrgRepos(
-  org: string,
-  maxPages = 0,
-): Promise<GitHubRepoSummary[]> {
-  const token = Deno.env.get("GITHUB_TOKEN")?.trim();
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
-    "User-Agent": "WPPlugins-Pages-Builder/1.0",
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const all: GitHubRepoSummary[] = [];
-  const batchSize = 6;
-
-  for (let startPage = 1; ; startPage += batchSize) {
-    const pages: number[] = [];
-    for (let i = 0; i < batchSize; i++) {
-      const p = startPage + i;
-      if (maxPages > 0 && p > maxPages) break;
-      pages.push(p);
-    }
-    if (pages.length === 0) break;
-
-    const batches = await Promise.all(
-      pages.map((p) => fetchPageWithRetry(org, p, headers)),
-    );
-
-    let reachedEnd = false;
-    for (const batch of batches) {
-      all.push(...batch);
-      if (batch.length < 100) {
-        reachedEnd = true;
-      }
-    }
-
-    console.log(`[build] Fetched ${all.length} repos (up to page ${pages[pages.length - 1]})...`);
-    if (reachedEnd) break;
-  }
-
-  return all;
-}
-
 async function main(): Promise<void> {
   const args = parseArgs(Deno.args, {
-    string: ["limit", "org", "out", "base-url"],
+    string: ["public-dir", "data-dir", "out", "base-url"],
     default: {
-      limit: "0",
-      org: "WPPlugins",
+      "public-dir": "public",
+      "data-dir": "data-out",
       out: "dist",
       "base-url": "https://wpplugins.github.io",
     },
   });
 
-  const maxPages = Math.max(0, Number.parseInt(String(args.limit), 10) || 0);
-  const org = String(args.org);
+  const publicDir = String(args["public-dir"]);
+  const dataDir = String(args["data-dir"]);
   const outDir = String(args.out);
   const baseUrl = String(args["base-url"]).replace(/\/+$/, "");
 
-  console.log(`[build] Fetching public repos for ${org} (maxPages=${maxPages || "all"})...`);
-  const rawRepos = await fetchOrgRepos(org, maxPages);
-  const plugins = filterAndCompactRepos(rawRepos);
-  const generatedAt = new Date().toISOString();
-
   await Deno.remove(outDir, { recursive: true }).catch(() => {});
   await ensureDir(outDir);
-  await copy("public", outDir, { overwrite: true });
+  await copy(publicDir, outDir, { overwrite: true });
 
-  const dataDir = join(outDir, "data");
-  await ensureDir(dataDir);
+  const distDataDir = join(outDir, "data");
+  await ensureDir(distDataDir);
 
-  await Deno.writeTextFile(
-    join(dataDir, "plugins.json"),
-    JSON.stringify(plugins),
-  );
-  await Deno.writeTextFile(
-    join(dataDir, "stats.json"),
-    `${
-      JSON.stringify(
-        {
-          total_plugins: plugins.length,
-          generated_at: generatedAt,
-          org,
-        },
-        null,
-        2,
-      )
-    }\n`,
-  );
+  let generatedAt = new Date().toISOString();
+  const pluginsSrc = join(dataDir, "plugins.json");
+  const statsSrc = join(dataDir, "stats.json");
+
+  if (await exists(pluginsSrc) && await exists(statsSrc)) {
+    await copy(pluginsSrc, join(distDataDir, "plugins.json"), {
+      overwrite: true,
+    });
+    await copy(statsSrc, join(distDataDir, "stats.json"), {
+      overwrite: true,
+    });
+    const stats = JSON.parse(await Deno.readTextFile(statsSrc)) as {
+      generated_at?: string;
+    };
+    if (stats.generated_at) {
+      generatedAt = stats.generated_at;
+    }
+    console.log(`[site] Attached prebuilt index from ${dataDir}/.`);
+  } else {
+    console.warn(
+      `[site] No prebuilt index found in ${dataDir}/; writing empty fallback index.`,
+    );
+    await Deno.writeTextFile(join(distDataDir, "plugins.json"), "[]");
+    await Deno.writeTextFile(
+      join(distDataDir, "stats.json"),
+      `${
+        JSON.stringify(
+          { total_plugins: 0, generated_at: generatedAt, org: "WPPlugins" },
+          null,
+          2,
+        )
+      }\n`,
+    );
+  }
+
   await Deno.writeTextFile(
     join(outDir, "sitemap.xml"),
     buildSitemapXml(baseUrl, generatedAt),
@@ -196,9 +94,7 @@ async function main(): Promise<void> {
     buildRobotsTxt(baseUrl),
   );
 
-  console.log(
-    `[build] Built ${outDir}/ with ${plugins.length} plugins at ${generatedAt}.`,
-  );
+  console.log(`[site] Assembled static website in ${outDir}/.`);
 }
 
 if (import.meta.main) {
