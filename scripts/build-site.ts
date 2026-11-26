@@ -124,6 +124,14 @@ export function renderPluginPageHtml(
       </div>
 
       <div class="selected-panel">
+        <div class="version-bar">
+          <label class="version-label" for="version-select">Version / Tag</label>
+          <select id="version-select" class="version-select" aria-label="Select plugin version tag">
+            <option value="">Latest (${safeBranch})</option>
+          </select>
+          <span id="version-status" class="version-status">Loading tags…</span>
+        </div>
+
         <div class="snippets-grid">
           <div class="snippet">
             <div class="snippet-head">

@@ -23,6 +23,8 @@
   const cmdTag = document.getElementById("cmd-tag");
   const cmdUpdate = document.getElementById("cmd-update");
   const cmdComposer = document.getElementById("cmd-composer");
+  const versionSelect = document.getElementById("version-select");
+  const versionStatus = document.getElementById("version-status");
 
   const guideAdd = document.getElementById("guide-add");
   const guideClone = document.getElementById("guide-clone");
@@ -35,7 +37,9 @@
   let plugins = [];
   let currentSlug = initialDataSlug || "akismet";
   let currentBranch = initialDataBranch || "main";
+  let currentVersion = "";
   let currentOs = "linux";
+  const tagCache = new Map();
 
   /** Detect OS from modern User-Agent Client Hints or fallback navigator strings. */
   function detectOs() {
@@ -58,20 +62,33 @@
     return { os: "linux", source: "auto" };
   }
 
-  function buildPlatformCommands(slug, _branch, os) {
+  function buildPlatformCommands(slug, _branch, os, version) {
     const repoUrl = `https://github.com/WPPlugins/${slug}.git`;
+    const ver = (version || "").trim();
 
     if (os === "windows") {
       return {
         label: "PowerShell",
-        clone: `git clone ${repoUrl}`,
-        submodule: `git submodule add ${repoUrl} wp-content/plugins/${slug}\n` +
-          `git commit -m "chore: add ${slug} plugin submodule"`,
-        tag: `Push-Location wp-content\\plugins\\${slug}\n` +
-          `git fetch --tags; if ($?) { $tag = git describe --tags --abbrev=0; git checkout $tag }\n` +
-          `Pop-Location`,
-        update:
-          `git submodule update --remote --merge wp-content/plugins/${slug}`,
+        clone: ver
+          ? `git clone --branch ${ver} --depth 1 ${repoUrl}`
+          : `git clone ${repoUrl}`,
+        submodule: ver
+          ? `git submodule add ${repoUrl} wp-content/plugins/${slug}\n` +
+            `Push-Location wp-content\\plugins\\${slug}; git checkout ${ver}; Pop-Location\n` +
+            `git add wp-content/plugins/${slug}; git commit -m "chore: add ${slug} (${ver}) submodule"`
+          : `git submodule add ${repoUrl} wp-content/plugins/${slug}\n` +
+            `git commit -m "chore: add ${slug} plugin submodule"`,
+        tag: ver
+          ? `Push-Location wp-content\\plugins\\${slug}\n` +
+            `git fetch --tags; git checkout ${ver}\n` +
+            `Pop-Location`
+          : `Push-Location wp-content\\plugins\\${slug}\n` +
+            `git fetch --tags; if ($?) { $tag = git describe --tags --abbrev=0; git checkout $tag }\n` +
+            `Pop-Location`,
+        update: ver
+          ? `Push-Location wp-content\\plugins\\${slug}; git fetch --tags; git checkout ${ver}; Pop-Location\n` +
+            `git add wp-content/plugins/${slug}; git commit -m "chore: update ${slug} to ${ver}"`
+          : `git submodule update --remote --merge wp-content/plugins/${slug}`,
         guideAdd: `# From your WordPress project root (PowerShell):\n` +
           `git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug>\n` +
           `git commit -m "chore: add <slug> plugin submodule"`,
@@ -90,14 +107,22 @@
     if (os === "macos") {
       return {
         label: "macOS (zsh)",
-        clone: `git clone ${repoUrl}`,
-        submodule:
-          `git submodule add ${repoUrl} wp-content/plugins/${slug} && \\\n` +
-          `  git commit -m "chore: add ${slug} plugin submodule"`,
-        tag:
-          `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout "$(git describe --tags --abbrev=0)")`,
-        update:
-          `git submodule update --remote --merge wp-content/plugins/${slug}`,
+        clone: ver
+          ? `git clone --branch ${ver} --depth 1 ${repoUrl}`
+          : `git clone ${repoUrl}`,
+        submodule: ver
+          ? `git submodule add ${repoUrl} wp-content/plugins/${slug} && \\\n` +
+            `  (cd wp-content/plugins/${slug} && git checkout ${ver}) && \\\n` +
+            `  git add wp-content/plugins/${slug} && git commit -m "chore: add ${slug} (${ver}) submodule"`
+          : `git submodule add ${repoUrl} wp-content/plugins/${slug} && \\\n` +
+            `  git commit -m "chore: add ${slug} plugin submodule"`,
+        tag: ver
+          ? `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout ${ver})`
+          : `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout "$(git describe --tags --abbrev=0)")`,
+        update: ver
+          ? `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout ${ver}) && \\\n` +
+            `  git add wp-content/plugins/${slug} && git commit -m "chore: update ${slug} to ${ver}"`
+          : `git submodule update --remote --merge wp-content/plugins/${slug}`,
         guideAdd: `# From your WordPress project root (zsh/bash):\n` +
           `git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug> && \\\n` +
           `  git commit -m "chore: add <slug> plugin submodule"`,
@@ -116,14 +141,22 @@
 
     return {
       label: "Linux (bash)",
-      clone: `git clone ${repoUrl}`,
-      submodule:
-        `git submodule add ${repoUrl} wp-content/plugins/${slug} && \\\n` +
-        `  git commit -m "chore: add ${slug} plugin submodule"`,
-      tag:
-        `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout "$(git describe --tags --abbrev=0)")`,
-      update:
-        `git submodule update --remote --merge wp-content/plugins/${slug}`,
+      clone: ver
+        ? `git clone --branch ${ver} --depth 1 ${repoUrl}`
+        : `git clone ${repoUrl}`,
+      submodule: ver
+        ? `git submodule add ${repoUrl} wp-content/plugins/${slug} && \\\n` +
+          `  (cd wp-content/plugins/${slug} && git checkout ${ver}) && \\\n` +
+          `  git add wp-content/plugins/${slug} && git commit -m "chore: add ${slug} (${ver}) submodule"`
+        : `git submodule add ${repoUrl} wp-content/plugins/${slug} && \\\n` +
+          `  git commit -m "chore: add ${slug} plugin submodule"`,
+      tag: ver
+        ? `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout ${ver})`
+        : `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout "$(git describe --tags --abbrev=0)")`,
+      update: ver
+        ? `(cd wp-content/plugins/${slug} && git fetch --tags && git checkout ${ver}) && \\\n` +
+          `  git add wp-content/plugins/${slug} && git commit -m "chore: update ${slug} to ${ver}"`
+        : `git submodule update --remote --merge wp-content/plugins/${slug}`,
       guideAdd: `# From your WordPress project root (bash):\n` +
         `git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug> && \\\n` +
         `  git commit -m "chore: add <slug> plugin submodule"`,
@@ -142,23 +175,30 @@
   }
 
   function renderCommands() {
-    const cmds = buildPlatformCommands(currentSlug, currentBranch, currentOs);
+    const cmds = buildPlatformCommands(
+      currentSlug,
+      currentBranch,
+      currentOs,
+      currentVersion,
+    );
     if (cmdClone) cmdClone.textContent = cmds.clone;
     if (cmdSubmodule) cmdSubmodule.textContent = cmds.submodule;
     if (cmdTag) cmdTag.textContent = cmds.tag;
     if (cmdUpdate) cmdUpdate.textContent = cmds.update;
     if (cmdComposer) {
+      const ref = currentVersion || currentBranch;
+      const pkgVersion = currentVersion || `dev-${currentBranch}`;
       cmdComposer.textContent = JSON.stringify(
         {
           type: "package",
           package: {
             name: `wpplugins/${currentSlug}`,
-            version: `dev-${currentBranch}`,
+            version: pkgVersion,
             type: "wordpress-plugin",
             source: {
               url: `https://github.com/WPPlugins/${currentSlug}.git`,
               type: "git",
-              reference: currentBranch,
+              reference: ref,
             },
             require: {
               "composer/installers": "^2.0",
@@ -181,6 +221,82 @@
         ? `Install Git · ${cmds.label}`
         : cmds.label;
     });
+  }
+
+  function populateVersionSelect(tags, preferredVersion = "") {
+    if (!versionSelect) return;
+    versionSelect.innerHTML = "";
+
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = `Latest (${currentBranch})`;
+    versionSelect.appendChild(defaultOpt);
+
+    for (const tag of tags) {
+      const opt = document.createElement("option");
+      opt.value = tag;
+      opt.textContent = tag;
+      versionSelect.appendChild(opt);
+    }
+
+    if (preferredVersion && tags.includes(preferredVersion)) {
+      currentVersion = preferredVersion;
+      versionSelect.value = preferredVersion;
+    } else {
+      currentVersion = "";
+      versionSelect.value = "";
+    }
+    renderCommands();
+  }
+
+  async function loadTagsForSlug(slug, preferredVersion = "") {
+    if (!versionSelect) return;
+
+    if (tagCache.has(slug)) {
+      const cached = tagCache.get(slug);
+      populateVersionSelect(cached, preferredVersion);
+      if (versionStatus) {
+        versionStatus.textContent = cached.length > 0
+          ? `${cached.length} release tags`
+          : "No release tags found (trunk only)";
+      }
+      return;
+    }
+
+    if (versionStatus) versionStatus.textContent = "Loading tags…";
+    populateVersionSelect([], "");
+
+    try {
+      const resp = await fetch(
+        `https://api.github.com/repos/WPPlugins/${
+          encodeURIComponent(slug)
+        }/tags?per_page=100`,
+        { headers: { Accept: "application/vnd.github+json" } },
+      );
+      if (!resp.ok) {
+        if (versionStatus) {
+          versionStatus.textContent = resp.status === 403
+            ? "GitHub API rate limit reached; using latest branch"
+            : "Tags unavailable; using latest branch";
+        }
+        return;
+      }
+      const data = await resp.json();
+      const tags = Array.isArray(data)
+        ? data.map((t) => t.name).filter(Boolean)
+        : [];
+      tagCache.set(slug, tags);
+      if (currentSlug === slug) {
+        populateVersionSelect(tags, preferredVersion);
+        if (versionStatus) {
+          versionStatus.textContent = tags.length > 0
+            ? `${tags.length} release tags`
+            : "No release tags found (trunk only)";
+        }
+      }
+    } catch {
+      if (versionStatus) versionStatus.textContent = "Using latest branch";
+    }
   }
 
   function setActiveOs(os, source = "manual") {
@@ -206,12 +322,25 @@
     renderCommands();
   }
 
-  function selectPlugin(slug, description, branch = "main", updateUrl = true) {
+  let tagFetchTimer = 0;
+
+  function selectPlugin(
+    slug,
+    description,
+    branch = "main",
+    updateUrl = true,
+    preferredVersion = "",
+    debounceTags = false,
+  ) {
     const cleanSlug = slug.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
     if (!cleanSlug) return;
 
+    const slugChanged = currentSlug !== cleanSlug;
     currentSlug = cleanSlug;
     currentBranch = branch || "main";
+    if (slugChanged) {
+      currentVersion = preferredVersion || "";
+    }
 
     if (selectedTitle) selectedTitle.textContent = cleanSlug;
     if (selectedBranch) selectedBranch.textContent = currentBranch;
@@ -232,7 +361,21 @@
     if (updateUrl && pageMode === "home") {
       const url = new URL(globalThis.location.href);
       url.searchParams.set("plugin", cleanSlug);
+      if (currentVersion) {
+        url.searchParams.set("version", currentVersion);
+      } else {
+        url.searchParams.delete("version");
+      }
       globalThis.history.replaceState({}, "", url);
+    }
+
+    clearTimeout(tagFetchTimer);
+    if (debounceTags) {
+      tagFetchTimer = setTimeout(() => {
+        loadTagsForSlug(cleanSlug, preferredVersion);
+      }, 350);
+    } else {
+      loadTagsForSlug(cleanSlug, preferredVersion);
     }
   }
 
@@ -322,12 +465,26 @@
     });
   });
 
+  if (versionSelect) {
+    versionSelect.addEventListener("change", () => {
+      currentVersion = versionSelect.value;
+      renderCommands();
+      const url = new URL(globalThis.location.href);
+      if (currentVersion) {
+        url.searchParams.set("version", currentVersion);
+      } else {
+        url.searchParams.delete("version");
+      }
+      globalThis.history.replaceState({}, "", url);
+    });
+  }
+
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       const val = e.target.value;
       renderResults(val);
       if (val.trim()) {
-        selectPlugin(val.trim(), "");
+        selectPlugin(val.trim(), "", "main", true, "", true);
       }
     });
   }
@@ -335,9 +492,17 @@
   async function init() {
     const detected = detectOs();
     setActiveOs(detected.os, detected.source);
+    const params = new URLSearchParams(globalThis.location.search);
+    const initialVersion = params.get("version") || "";
 
     if (pageMode === "plugin" && initialDataSlug) {
-      selectPlugin(initialDataSlug, undefined, initialDataBranch, false);
+      selectPlugin(
+        initialDataSlug,
+        undefined,
+        initialDataBranch,
+        false,
+        initialVersion,
+      );
       return;
     }
 
@@ -369,13 +534,12 @@
         found ? found.d : `Mirror commands for ${slug}`,
         found ? found.b : "main",
         false,
+        initialVersion,
       );
       return;
     }
 
-    const initialSlug = new URLSearchParams(globalThis.location.search).get(
-      "plugin",
-    );
+    const initialSlug = params.get("plugin");
     if (initialSlug && searchInput) {
       searchInput.value = initialSlug;
       const found = plugins.find((p) => p.s === initialSlug.toLowerCase());
@@ -383,8 +547,12 @@
         initialSlug,
         found ? found.d : "",
         found ? found.b : "main",
+        true,
+        initialVersion,
       );
       renderResults(initialSlug);
+    } else if (pageMode === "home") {
+      loadTagsForSlug(currentSlug, initialVersion);
     }
   }
 
