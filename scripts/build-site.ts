@@ -68,6 +68,34 @@ Sitemap: ${baseUrl}/sitemap.xml
 `;
 }
 
+async function fetchPageWithRetry(
+  org: string,
+  page: number,
+  headers: Record<string, string>,
+): Promise<GitHubRepoSummary[]> {
+  const url = `${GITHUB_API}/orgs/${
+    encodeURIComponent(org)
+  }/repos?type=public&per_page=100&page=${page}`;
+
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const resp = await fetch(url, { headers });
+    if (resp.ok) {
+      return (await resp.json()) as GitHubRepoSummary[];
+    }
+    if (resp.status === 403 || resp.status === 429 || resp.status >= 500) {
+      const waitMs = 1000 * 2 ** attempt;
+      console.warn(
+        `[build] HTTP ${resp.status} on page ${page}; retrying in ${waitMs}ms...`,
+      );
+      await new Promise((r) => setTimeout(r, waitMs));
+      continue;
+    }
+    throw new Error(`GitHub API failed (${resp.status}): ${await resp.text()}`);
+  }
+
+  throw new Error(`Failed to fetch page ${page} after retries.`);
+}
+
 async function fetchOrgRepos(
   org: string,
   maxPages = 0,
@@ -83,40 +111,31 @@ async function fetchOrgRepos(
   }
 
   const all: GitHubRepoSummary[] = [];
-  for (let page = 1; ; page++) {
-    if (maxPages > 0 && page > maxPages) break;
+  const batchSize = 6;
 
-    const url = `${GITHUB_API}/orgs/${
-      encodeURIComponent(org)
-    }/repos?type=public&per_page=100&sort=full_name&page=${page}`;
+  for (let startPage = 1; ; startPage += batchSize) {
+    const pages: number[] = [];
+    for (let i = 0; i < batchSize; i++) {
+      const p = startPage + i;
+      if (maxPages > 0 && p > maxPages) break;
+      pages.push(p);
+    }
+    if (pages.length === 0) break;
 
-    let resp: Response | null = null;
-    for (let attempt = 0; attempt < 4; attempt++) {
-      resp = await fetch(url, { headers });
-      if (resp.ok) break;
-      if (resp.status === 403 || resp.status === 429 || resp.status >= 500) {
-        const waitMs = 1000 * 2 ** attempt;
-        console.warn(
-          `[build] HTTP ${resp.status} on page ${page}; retrying in ${waitMs}ms...`,
-        );
-        await new Promise((r) => setTimeout(r, waitMs));
-        continue;
+    const batches = await Promise.all(
+      pages.map((p) => fetchPageWithRetry(org, p, headers)),
+    );
+
+    let reachedEnd = false;
+    for (const batch of batches) {
+      all.push(...batch);
+      if (batch.length < 100) {
+        reachedEnd = true;
       }
-      throw new Error(`GitHub API failed (${resp.status}): ${await resp.text()}`);
     }
 
-    if (!resp || !resp.ok) {
-      throw new Error(`Failed to fetch page ${page} after retries.`);
-    }
-
-    const batch = (await resp.json()) as GitHubRepoSummary[];
-    if (batch.length === 0) break;
-
-    all.push(...batch);
-    if (page % 25 === 0) {
-      console.log(`[build] Fetched ${all.length} repos (page ${page})...`);
-    }
-    if (batch.length < 100) break;
+    console.log(`[build] Fetched ${all.length} repos (up to page ${pages[pages.length - 1]})...`);
+    if (reachedEnd) break;
   }
 
   return all;
