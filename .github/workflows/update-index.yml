@@ -2,7 +2,7 @@ name: Update Plugin Index
 
 on:
   schedule:
-    - cron: "0 */2 * * *"
+    - cron: "17 */2 * * *"
   push:
     branches: [main]
     paths:
