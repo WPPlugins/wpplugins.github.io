@@ -419,7 +419,7 @@ pre {
 
 .snippets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -457,7 +457,7 @@ pre {
 .guide-grid {
   margin-top: 1.25rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.25rem;
 }
 
