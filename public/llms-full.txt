@@ -1,0 +1,80 @@
+# WPPlugins — Full Reference for AI Agents & Automation
+
+WPPlugins mirrors public WordPress.org plugins from Subversion (`https://plugins.svn.wordpress.org/<slug>/`) to individual GitHub repositories (`https://github.com/WPPlugins/<slug>`).
+
+## 1. Repository & URL Conventions
+
+| Resource | Pattern |
+| :--- | :--- |
+| GitHub Repository | `https://github.com/WPPlugins/<slug>` |
+| Git Clone URL | `https://github.com/WPPlugins/<slug>.git` |
+| Dedicated Web Page | `https://wpplugins.github.io/plugins/<slug>/` |
+| Upstream WordPress.org Page | `https://wordpress.org/plugins/<slug>/` |
+| Paginated Directory | `https://wpplugins.github.io/plugins/` (and `/plugins/page/<n>/`) |
+
+## 2. Branch & Tag Semantics
+
+- `main` (or `master` on older legacy mirrors) tracks WordPress.org SVN `trunk/`.
+- Annotated Git tags match WordPress.org SVN `tags/<version>` and are sorted in SemVer order during sync.
+- Commit messages include the upstream SVN revision and author when synced by `WPPlugins/mirror-orchestrator`.
+
+## 3. Data Dump Schema (`/data/plugins.json`)
+
+The index at `https://wpplugins.github.io/data/plugins.json` is rebuilt every 2 hours (`0 */2 * * *` UTC) and contains a JSON array sorted alphabetically by slug:
+
+```json
+[
+  {
+    "s": "akismet",
+    "d": "The best anti-spam protection to block spam comments and spam in a contact form.",
+    "p": "2026-11-26",
+    "b": "main"
+  }
+]
+```
+
+- `s`: WordPress.org plugin slug (and GitHub repository name under `WPPlugins`).
+- `d`: Short description (up to 200 characters).
+- `p`: Last pushed date (`YYYY-MM-DD`).
+- `b`: Default branch (`main` or `master`).
+
+## 4. Platform-Specific Recipes
+
+### Windows (PowerShell)
+```powershell
+git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug>
+git commit -m "chore: add <slug> plugin submodule"
+
+# Pin to latest release tag:
+Push-Location wp-content\plugins\<slug>
+git fetch --tags; if ($?) { $tag = git describe --tags --abbrev=0; git checkout $tag }
+Pop-Location
+```
+
+### macOS (zsh) / Linux (bash)
+```bash
+git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug> && \
+  git commit -m "chore: add <slug> plugin submodule"
+
+# Pin to latest release tag:
+(cd wp-content/plugins/<slug> && git fetch --tags && git checkout "$(git describe --tags --abbrev=0)")
+```
+
+### Composer VCS
+```json
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/WPPlugins/<slug>.git"
+    }
+  ]
+}
+```
+Note: Many WordPress.org plugins do not ship a `composer.json`. For Composer dependency resolution, pair with WPackagist (`https://wpackagist.org/`) or define a `type: package` entry pointing to the desired tag/archive.
+
+## 5. Limitations & Policies
+
+- **Read-only mirrors:** Do not open issues or PRs on individual plugin mirror repositories; submit upstream fixes to the plugin authors on WordPress.org.
+- **95 MB Blob Guardrail:** Files exceeding 95 MB in SVN are skipped during sync to comply with GitHub's 100 MB file limit. Skipped files are recorded in `https://github.com/WPPlugins/mirror-orchestrator/blob/main/state/oversized.json`.
+- **Sync Issues & Priority Requests:** Open an issue in `https://github.com/WPPlugins/mirror-orchestrator/issues/new/choose`.

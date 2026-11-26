@@ -1,0 +1,27 @@
+# WPPlugins
+
+> Automated, serverless WordPress.org SVN-to-GitHub plugin mirror covering 17,900+ WordPress plugins.
+
+## Key URLs
+
+- GitHub Organization: https://github.com/WPPlugins
+- Mirror Orchestrator: https://github.com/WPPlugins/mirror-orchestrator
+- Browse All Plugins (Paginated): https://wpplugins.github.io/plugins/
+- Per-Plugin Mirror Page: `https://wpplugins.github.io/plugins/<slug>/`
+- Per-Plugin Git Remote: `https://github.com/WPPlugins/<slug>.git`
+- Extended AI Documentation: https://wpplugins.github.io/llms-full.txt
+- Machine-Readable API Spec: https://wpplugins.github.io/openapi.json
+
+## Machine-Readable Endpoints
+
+- [Plugin Index JSON](https://wpplugins.github.io/data/plugins.json): Compact JSON array of `{ "s": slug, "d": description, "p": last_pushed_YYYY_MM_DD, "b": default_branch }`. Refreshed every 2 hours.
+- [Index Stats JSON](https://wpplugins.github.io/data/stats.json): `{ "total_plugins": number, "generated_at": iso8601, "org": "WPPlugins" }`.
+- [Sitemap Index](https://wpplugins.github.io/sitemap-index.xml): XML sitemap index covering directory pages and all mirrored plugin pages.
+
+## Common Usage for Coding Agents
+
+- **Clone a plugin:** `git clone https://github.com/WPPlugins/<slug>.git`
+- **Add as Git submodule in WordPress:** `git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<slug>`
+- **Pin to a release tag:** `git fetch --tags && git checkout <version>` (Git tags match WordPress.org SVN `tags/*`).
+- **Default branch:** Newer mirrors use `main`; some pre-orchestrator mirrors use `master` (check the `b` field in `/data/plugins.json`).
+- **Constraints:** Mirrors are read-only. Individual files larger than 95 MB are skipped (logged in `WPPlugins/mirror-orchestrator`'s `state/oversized.json`).

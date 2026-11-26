@@ -1,0 +1,16 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "WPPlugins Mirror",
+  "name_for_model": "wpplugins_mirror",
+  "description_for_human": "Search 17,900+ mirrored WordPress.org plugins on GitHub with Windows, macOS, and Linux Git/submodule commands.",
+  "description_for_model": "Use WPPlugins to find GitHub mirror repositories (https://github.com/WPPlugins/<slug>.git) for WordPress.org plugins. Query /data/plugins.json for the complete plugin list or visit /plugins/<slug>/ for instructions.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://wpplugins.github.io/openapi.json"
+  },
+  "contact_email": "https://github.com/WPPlugins/mirror-orchestrator/issues",
+  "legal_info_url": "https://github.com/WPPlugins/mirror-orchestrator/blob/main/LICENSE"
+}

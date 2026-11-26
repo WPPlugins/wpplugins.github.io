@@ -9,6 +9,8 @@
       content="Search 17,900+ mirrored WordPress.org plugins on GitHub. Copy-paste Windows, macOS, and Linux commands for git clone, git submodule, tag pinning, and Composer."
     />
     <link rel="canonical" href="https://wpplugins.github.io/" />
+    <link rel="alternate" type="text/plain" title="LLMs Guide"
+      href="/llms.txt" />
     <meta property="og:type" content="website" />
     <meta property="og:title"
       content="WPPlugins — WordPress.org SVN-to-GitHub Mirror" />
@@ -24,34 +26,52 @@
       name="twitter:description"
       content="Search 17,900+ WordPress.org plugins mirrored to GitHub."
     />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="/styles.css" />
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "WPPlugins",
-      "url": "https://wpplugins.github.io/",
-      "description": "Automated WordPress.org SVN-to-GitHub plugin mirror directory and developer guide.",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://wpplugins.github.io/?plugin={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "name": "WPPlugins",
+          "url": "https://wpplugins.github.io/",
+          "description": "Automated WordPress.org SVN-to-GitHub plugin mirror directory and developer guide.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://wpplugins.github.io/plugins/{search_term_string}/",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "DataCatalog",
+          "name": "WPPlugins Mirror Index",
+          "url": "https://wpplugins.github.io/plugins/",
+          "dataset": {
+            "@type": "Dataset",
+            "name": "WPPlugins Mirrored Repositories JSON",
+            "distribution": {
+              "@type": "DataDownload",
+              "encodingFormat": "application/json",
+              "contentUrl": "https://wpplugins.github.io/data/plugins.json"
+            }
+          }
+        }
+      ]
     }
     </script>
   </head>
-  <body>
+  <body data-page="home">
     <header class="topbar">
       <div class="container topbar-inner">
-        <a class="brand" href="https://github.com/WPPlugins" target="_blank"
-          rel="noopener">
+        <a class="brand" href="/">
         <span class="brand-dot" aria-hidden="true"></span>
         WPPlugins
       </a>
         <nav class="nav-links" aria-label="Primary">
           <a href="#lookup">Lookup</a>
-          <a href="#guides">Submodule Guide</a>
-          <a href="#composer">Composer</a>
+          <a href="/plugins/">Directory</a>
+          <a href="#guides">Submodules</a>
+          <a href="#ai-integration">AI &amp; API</a>
           <a href="https://github.com/WPPlugins/mirror-orchestrator"
             target="_blank" rel="noopener">
           Orchestrator ↗
@@ -99,13 +119,14 @@
 
     <main class="container main-content">
       <section id="lookup" class="card card-elevated">
-        <div class="section-head">
+        <div class="section-head section-head-row">
           <div>
             <h2>Plugin Command Generator</h2>
             <p class="muted">
-            Search the live index or type any WordPress.org plugin slug to customize every command below.
+            Search the live index or open a dedicated plugin page at <code>/plugins/&lt;slug&gt;/</code>.
           </p>
           </div>
+          <a class="btn-link" href="/plugins/">Browse All Plugins →</a>
         </div>
 
         <div class="search-box">
@@ -138,6 +159,9 @@
             </p>
             </div>
             <div class="selected-links">
+              <a class="btn-link" id="link-permalink" href="/plugins/akismet/">
+              Plugin Page
+            </a>
               <a class="btn-link" id="link-github"
                 href="https://github.com/WPPlugins/akismet" target="_blank"
                 rel="noopener">
@@ -273,16 +297,61 @@
           </article>
         </div>
       </section>
+
+      <section id="ai-integration" class="card">
+        <div class="section-head">
+          <div>
+            <h2>AI Agent &amp; Crawler Integration</h2>
+            <p class="muted">
+            Machine-readable endpoints, LLM instructions, and structured sitemaps for coding agents and search crawlers.
+          </p>
+          </div>
+        </div>
+
+        <div class="ai-grid">
+          <a class="ai-card" href="/llms.txt">
+            <strong><code>/llms.txt</code></strong>
+            <span
+              class="muted">Concise Markdown index &amp; usage rules for AI agents (llmstxt.org).</span>
+          </a>
+          <a class="ai-card" href="/llms-full.txt">
+            <strong><code>/llms-full.txt</code></strong>
+            <span
+              class="muted">Complete AI reference with Windows/macOS/Linux &amp; Composer recipes.</span>
+          </a>
+          <a class="ai-card" href="/openapi.json">
+            <strong><code>/openapi.json</code></strong>
+            <span
+              class="muted">OpenAPI 3.1 schema for static JSON endpoints and plugin URLs.</span>
+          </a>
+          <a class="ai-card" href="/.well-known/ai-plugin.json">
+            <strong><code>/.well-known/ai-plugin.json</code></strong>
+            <span class="muted">Standard AI plugin discovery manifest.</span>
+          </a>
+          <a class="ai-card" href="/data/plugins.json">
+            <strong><code>/data/plugins.json</code></strong>
+            <span
+              class="muted">Full compact JSON dump of all mirrored plugins (refreshed every 2h).</span>
+          </a>
+          <a class="ai-card" href="/sitemap-index.xml">
+            <strong><code>/sitemap-index.xml</code></strong>
+            <span
+              class="muted">XML sitemap index covering directory pages and every plugin URL.</span>
+          </a>
+        </div>
+      </section>
     </main>
 
     <footer class="footer container">
       <p>
       Read-only mirrors maintained by
       <a href="https://github.com/WPPlugins/mirror-orchestrator" target="_blank" rel="noopener">WPPlugins/mirror-orchestrator</a>
-      · Index updates every 2 hours.
+      · <a href="/plugins/">Plugin Directory</a>
+      · <a href="/llms.txt">llms.txt</a>
+      · <a href="/sitemap-index.xml">Sitemap</a>
     </p>
     </footer>
 
-    <script src="./app.js" defer></script>
+    <script src="/app.js" defer></script>
   </body>
 </html>

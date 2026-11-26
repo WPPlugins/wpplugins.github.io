@@ -1,0 +1,103 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WPPlugins Static Mirror Index API",
+    "version": "1.0.0",
+    "description": "Read-only static JSON endpoints and canonical URL patterns for the WPPlugins WordPress.org SVN-to-GitHub mirror.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/WPPlugins/mirror-orchestrator/blob/main/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://wpplugins.github.io",
+      "description": "GitHub Pages CDN (refreshed every 2 hours)"
+    }
+  ],
+  "paths": {
+    "/data/stats.json": {
+      "get": {
+        "operationId": "getMirrorStats",
+        "summary": "Get total mirrored plugin count and last index timestamp",
+        "responses": {
+          "200": {
+            "description": "Mirror index metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["total_plugins", "generated_at", "org"],
+                  "properties": {
+                    "total_plugins": { "type": "integer" },
+                    "generated_at": { "type": "string", "format": "date-time" },
+                    "org": { "type": "string", "example": "WPPlugins" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/plugins.json": {
+      "get": {
+        "operationId": "listMirroredPlugins",
+        "summary": "Retrieve compact index of all mirrored WordPress.org plugins",
+        "responses": {
+          "200": {
+            "description": "Array of compact plugin records sorted alphabetically by slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["s", "d", "p", "b"],
+                    "properties": {
+                      "s": {
+                        "type": "string",
+                        "description": "WordPress.org plugin slug"
+                      },
+                      "d": {
+                        "type": "string",
+                        "description": "Short description (max 200 chars)"
+                      },
+                      "p": {
+                        "type": "string",
+                        "description": "Last pushed date (YYYY-MM-DD)"
+                      },
+                      "b": {
+                        "type": "string",
+                        "description": "Default Git branch (main or master)"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/{slug}/": {
+      "get": {
+        "operationId": "getPluginPage",
+        "summary": "Canonical HTML page with Schema.org JSON-LD and Git/Submodule instructions for a plugin",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Static HTML page for the plugin mirror"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,10 @@
 (() => {
   const OS_STORAGE_KEY = "wpplugins_os_preference";
 
+  const pageMode = document.body.dataset.page || "home";
+  const initialDataSlug = document.body.dataset.slug || "";
+  const initialDataBranch = document.body.dataset.branch || "main";
+
   const searchInput = document.getElementById("search-input");
   const resultsList = document.getElementById("results-list");
   const statsBar = document.getElementById("stats-bar");
@@ -10,6 +14,7 @@
   const selectedTitle = document.getElementById("selected-title");
   const selectedBranch = document.getElementById("selected-branch");
   const selectedDesc = document.getElementById("selected-desc");
+  const linkPermalink = document.getElementById("link-permalink");
   const linkGithub = document.getElementById("link-github");
   const linkWporg = document.getElementById("link-wporg");
 
@@ -28,8 +33,8 @@
   );
 
   let plugins = [];
-  let currentSlug = "akismet";
-  let currentBranch = "main";
+  let currentSlug = initialDataSlug || "akismet";
+  let currentBranch = initialDataBranch || "main";
   let currentOs = "linux";
 
   /** Detect OS from modern User-Agent Client Hints or fallback navigator strings. */
@@ -109,7 +114,6 @@
       };
     }
 
-    // Linux (bash)
     return {
       label: "Linux (bash)",
       clone: `git clone ${repoUrl}`,
@@ -139,20 +143,22 @@
 
   function renderCommands() {
     const cmds = buildPlatformCommands(currentSlug, currentBranch, currentOs);
-    cmdClone.textContent = cmds.clone;
-    cmdSubmodule.textContent = cmds.submodule;
-    cmdTag.textContent = cmds.tag;
-    cmdUpdate.textContent = cmds.update;
-    cmdComposer.textContent = JSON.stringify(
-      { type: "vcs", url: `https://github.com/WPPlugins/${currentSlug}.git` },
-      null,
-      2,
-    );
+    if (cmdClone) cmdClone.textContent = cmds.clone;
+    if (cmdSubmodule) cmdSubmodule.textContent = cmds.submodule;
+    if (cmdTag) cmdTag.textContent = cmds.tag;
+    if (cmdUpdate) cmdUpdate.textContent = cmds.update;
+    if (cmdComposer) {
+      cmdComposer.textContent = JSON.stringify(
+        { type: "vcs", url: `https://github.com/WPPlugins/${currentSlug}.git` },
+        null,
+        2,
+      );
+    }
 
-    guideAdd.textContent = cmds.guideAdd;
-    guideClone.textContent = cmds.guideClone;
-    guidePin.textContent = cmds.guidePin;
-    guideInstall.textContent = cmds.guideInstall;
+    if (guideAdd) guideAdd.textContent = cmds.guideAdd;
+    if (guideClone) guideClone.textContent = cmds.guideClone;
+    if (guidePin) guidePin.textContent = cmds.guidePin;
+    if (guideInstall) guideInstall.textContent = cmds.guideInstall;
 
     guideOsLabels.forEach((el, idx) => {
       el.textContent = idx === 3 ? `Install Git · ${cmds.label}` : cmds.label;
@@ -166,42 +172,54 @@
       tab.setAttribute("aria-selected", selected ? "true" : "false");
     });
 
-    if (source === "auto") {
-      osDetectedBadge.textContent = "auto-detected";
-      osDetectedBadge.hidden = false;
-    } else if (source === "saved") {
-      osDetectedBadge.textContent = "saved";
-      osDetectedBadge.hidden = false;
-    } else {
-      osDetectedBadge.hidden = true;
-      localStorage.setItem(OS_STORAGE_KEY, os);
+    if (osDetectedBadge) {
+      if (source === "auto") {
+        osDetectedBadge.textContent = "auto-detected";
+        osDetectedBadge.hidden = false;
+      } else if (source === "saved") {
+        osDetectedBadge.textContent = "saved";
+        osDetectedBadge.hidden = false;
+      } else {
+        osDetectedBadge.hidden = true;
+        localStorage.setItem(OS_STORAGE_KEY, os);
+      }
     }
 
     renderCommands();
   }
 
-  function selectPlugin(slug, description, branch = "main") {
+  function selectPlugin(slug, description, branch = "main", updateUrl = true) {
     const cleanSlug = slug.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
     if (!cleanSlug) return;
 
     currentSlug = cleanSlug;
     currentBranch = branch || "main";
 
-    selectedTitle.textContent = cleanSlug;
-    selectedBranch.textContent = currentBranch;
-    selectedDesc.textContent = description ||
-      `WordPress.org mirror repository for ${cleanSlug}`;
-    linkGithub.href = `https://github.com/WPPlugins/${cleanSlug}`;
-    linkWporg.href = `https://wordpress.org/plugins/${cleanSlug}/`;
+    if (selectedTitle) selectedTitle.textContent = cleanSlug;
+    if (selectedBranch) selectedBranch.textContent = currentBranch;
+    if (selectedDesc && description !== undefined) {
+      selectedDesc.textContent = description ||
+        `WordPress.org mirror repository for ${cleanSlug}`;
+    }
+    if (linkPermalink) linkPermalink.href = `/plugins/${cleanSlug}/`;
+    if (linkGithub) {
+      linkGithub.href = `https://github.com/WPPlugins/${cleanSlug}`;
+    }
+    if (linkWporg) {
+      linkWporg.href = `https://wordpress.org/plugins/${cleanSlug}/`;
+    }
 
     renderCommands();
 
-    const url = new URL(globalThis.location.href);
-    url.searchParams.set("plugin", cleanSlug);
-    globalThis.history.replaceState({}, "", url);
+    if (updateUrl && pageMode === "home") {
+      const url = new URL(globalThis.location.href);
+      url.searchParams.set("plugin", cleanSlug);
+      globalThis.history.replaceState({}, "", url);
+    }
   }
 
   function renderResults(query) {
+    if (!resultsList) return;
     resultsList.innerHTML = "";
     const q = query.trim().toLowerCase();
     if (!q) return;
@@ -251,6 +269,20 @@
     }
   }
 
+  function resolveFallbackSlugFromPath() {
+    const parts = globalThis.location.pathname
+      .split("/")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts[0] === "plugins" && parts[1] && parts[1] !== "page") {
+      return parts[1];
+    }
+    if (parts.length === 1 && !parts[0].includes(".")) {
+      return parts[0];
+    }
+    return "akismet";
+  }
+
   osTabs.forEach((tab) => {
     tab.addEventListener("click", () => {
       const os = tab.getAttribute("data-os");
@@ -272,42 +304,68 @@
     });
   });
 
-  searchInput.addEventListener("input", (e) => {
-    const val = e.target.value;
-    renderResults(val);
-    if (val.trim()) {
-      selectPlugin(val.trim(), "");
-    }
-  });
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      const val = e.target.value;
+      renderResults(val);
+      if (val.trim()) {
+        selectPlugin(val.trim(), "");
+      }
+    });
+  }
 
   async function init() {
     const detected = detectOs();
     setActiveOs(detected.os, detected.source);
 
+    if (pageMode === "plugin" && initialDataSlug) {
+      selectPlugin(initialDataSlug, undefined, initialDataBranch, false);
+      return;
+    }
+
     try {
-      const [statsRes, pluginsRes] = await Promise.all([
-        fetch("./data/stats.json"),
-        fetch("./data/plugins.json"),
-      ]);
-      if (statsRes.ok) {
+      const requests = [fetch("/data/stats.json")];
+      if (pageMode === "home" || pageMode === "fallback") {
+        requests.push(fetch("/data/plugins.json"));
+      }
+      const [statsRes, pluginsRes] = await Promise.all(requests);
+      if (statsRes && statsRes.ok && statsBar) {
         const stats = await statsRes.json();
         statsBar.textContent =
           `${stats.total_plugins.toLocaleString()} mirrored plugins`;
       }
-      if (pluginsRes.ok) {
+      if (pluginsRes && pluginsRes.ok) {
         plugins = await pluginsRes.json();
       }
     } catch {
-      statsBar.textContent = "17,900+ mirrored plugins";
+      if (statsBar) statsBar.textContent = "17,900+ mirrored plugins";
+    }
+
+    if (pageMode === "fallback") {
+      const slug = resolveFallbackSlugFromPath();
+      const found = plugins.find((p) => p.s === slug.toLowerCase());
+      const heading = document.getElementById("fallback-heading");
+      if (heading) heading.textContent = `${slug} — Mirror Commands`;
+      selectPlugin(
+        slug,
+        found ? found.d : `Mirror commands for ${slug}`,
+        found ? found.b : "main",
+        false,
+      );
+      return;
     }
 
     const initialSlug = new URLSearchParams(globalThis.location.search).get(
       "plugin",
     );
-    if (initialSlug) {
+    if (initialSlug && searchInput) {
       searchInput.value = initialSlug;
       const found = plugins.find((p) => p.s === initialSlug.toLowerCase());
-      selectPlugin(initialSlug, found ? found.d : "", found ? found.b : "main");
+      selectPlugin(
+        initialSlug,
+        found ? found.d : "",
+        found ? found.b : "main",
+      );
       renderResults(initialSlug);
     }
   }

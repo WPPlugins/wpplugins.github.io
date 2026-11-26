@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WPPlugins — Plugin Mirror Lookup</title>
+    <meta name="robots" content="noindex, follow" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="fallback">
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="brand" href="/">
+        <span class="brand-dot" aria-hidden="true"></span>
+        WPPlugins
+      </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="/">Home</a>
+          <a href="/plugins/">Browse Directory</a>
+          <a href="/#guides">Submodule Guide</a>
+          <a href="/llms.txt">llms.txt</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container main-content">
+      <section class="card card-elevated">
+        <div class="badge-row" style="margin-bottom: 0.75rem;">
+          <span class="pill pill-accent"
+            id="stats-bar">Loading plugin index…</span>
+          <span class="pill">Live Slug Resolver</span>
+        </div>
+        <h1 id="fallback-heading"
+          style="margin: 0 0 0.5rem;">Generate Mirror Commands</h1>
+        <p class="muted" id="fallback-subtext">
+        Showing Git &amp; submodule commands for this slug.
+      </p>
+
+        <div class="os-bar" aria-label="Operating system selector"
+          style="margin-top: 1rem;">
+          <span class="os-label">
+          Platform
+          <span id="os-detected-badge" class="os-detected">auto</span>
+        </span>
+          <div class="os-tabs" role="tablist" aria-label="Operating System">
+            <button class="os-tab" role="tab" type="button" data-os="windows"
+              aria-selected="false">
+            Windows <span class="os-shell">(PowerShell)</span>
+          </button>
+            <button class="os-tab" role="tab" type="button" data-os="macos"
+              aria-selected="false">
+            macOS <span class="os-shell">(zsh)</span>
+          </button>
+            <button class="os-tab" role="tab" type="button" data-os="linux"
+              aria-selected="false">
+            Linux <span class="os-shell">(bash)</span>
+          </button>
+          </div>
+        </div>
+
+        <div id="selected-panel" class="selected-panel">
+          <div class="selected-header">
+            <div>
+              <div class="selected-title-row">
+                <h2 id="selected-title" style="margin: 0;">akismet</h2>
+                <span class="slug-badge" id="selected-branch">main</span>
+              </div>
+              <p id="selected-desc" class="muted"></p>
+            </div>
+            <div class="selected-links">
+              <a class="btn-link" id="link-github"
+                href="https://github.com/WPPlugins/akismet" target="_blank"
+                rel="noopener">GitHub Repo ↗</a>
+              <a class="btn-link" id="link-wporg"
+                href="https://wordpress.org/plugins/akismet/" target="_blank"
+                rel="noopener">WordPress.org ↗</a>
+            </div>
+          </div>
+
+          <div class="snippets-grid">
+            <div class="snippet">
+              <div class="snippet-head">
+                <span>Clone Repository</span>
+                <button class="copy-btn" data-target="cmd-clone"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="cmd-clone"></code></pre>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-head">
+                <span>Add as Git Submodule</span>
+                <button class="copy-btn" data-target="cmd-submodule"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="cmd-submodule"></code></pre>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-head">
+                <span>Pin to Latest Release Tag</span>
+                <button class="copy-btn" data-target="cmd-tag"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="cmd-tag"></code></pre>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-head">
+                <span>Update Submodule</span>
+                <button class="copy-btn" data-target="cmd-update"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="cmd-update"></code></pre>
+            </div>
+          </div>
+
+          <div class="snippet snippet-full">
+            <div class="snippet-head">
+              <span>Composer VCS Repository (<code>composer.json</code>)</span>
+              <button class="copy-btn" data-target="cmd-composer"
+                type="button">Copy</button>
+            </div>
+            <pre><code id="cmd-composer"></code></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
