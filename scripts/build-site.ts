@@ -160,12 +160,24 @@ export function renderPluginPageHtml(
 
         <div class="snippet snippet-full">
           <div class="snippet-head">
-            <span>Composer VCS Repository (<code>composer.json</code>)</span>
+            <span>Composer Repository (<code>composer.json</code>)</span>
             <button class="copy-btn" data-target="cmd-composer" type="button">Copy</button>
           </div>
           <pre><code id="cmd-composer">{
-  "type": "vcs",
-  "url": "${cloneUrl}"
+  "type": "package",
+  "package": {
+    "name": "wpplugins/${safeSlug}",
+    "version": "dev-${safeBranch}",
+    "type": "wordpress-plugin",
+    "source": {
+      "url": "${cloneUrl}",
+      "type": "git",
+      "reference": "${safeBranch}"
+    },
+    "require": {
+      "composer/installers": "^2.0"
+    }
+  }
 }</code></pre>
         </div>
       </div>

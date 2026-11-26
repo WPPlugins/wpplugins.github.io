@@ -149,7 +149,22 @@
     if (cmdUpdate) cmdUpdate.textContent = cmds.update;
     if (cmdComposer) {
       cmdComposer.textContent = JSON.stringify(
-        { type: "vcs", url: `https://github.com/WPPlugins/${currentSlug}.git` },
+        {
+          type: "package",
+          package: {
+            name: `wpplugins/${currentSlug}`,
+            version: `dev-${currentBranch}`,
+            type: "wordpress-plugin",
+            source: {
+              url: `https://github.com/WPPlugins/${currentSlug}.git`,
+              type: "git",
+              reference: currentBranch,
+            },
+            require: {
+              "composer/installers": "^2.0",
+            },
+          },
+        },
         null,
         2,
       );
@@ -160,8 +175,11 @@
     if (guidePin) guidePin.textContent = cmds.guidePin;
     if (guideInstall) guideInstall.textContent = cmds.guideInstall;
 
-    guideOsLabels.forEach((el, idx) => {
-      el.textContent = idx === 3 ? `Install Git · ${cmds.label}` : cmds.label;
+    guideOsLabels.forEach((el) => {
+      const kind = el.getAttribute("data-guide-kind");
+      el.textContent = kind === "install"
+        ? `Install Git · ${cmds.label}`
+        : cmds.label;
     });
   }
 

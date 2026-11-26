@@ -236,10 +236,26 @@
 
         <div class="guide-grid">
           <article class="guide-block">
-            <h3>1. Initialize &amp; Add a Plugin Submodule</h3>
+            <h3>1. Install Git (Prerequisite)</h3>
             <p class="muted">
-            Keep third-party plugin code out of your main Git history while locking exact versions.
-          </p>
+              Ensure <code>git</code> is installed on your machine before cloning or managing submodules.
+            </p>
+            <div class="snippet">
+              <div class="snippet-head">
+                <span class="guide-os-label"
+                  data-guide-kind="install">Install Git</span>
+                <button class="copy-btn" data-target="guide-install"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="guide-install"></code></pre>
+            </div>
+          </article>
+
+          <article class="guide-block">
+            <h3>2. Initialize &amp; Add a Plugin Submodule</h3>
+            <p class="muted">
+              Keep third-party plugin code out of your main Git history while locking exact versions.
+            </p>
             <div class="snippet">
               <div class="snippet-head">
                 <span class="guide-os-label">Shell</span>
@@ -251,10 +267,10 @@
           </article>
 
           <article class="guide-block">
-            <h3>2. Clone a Project with Submodules</h3>
+            <h3>3. Clone a Project with Submodules</h3>
             <p class="muted">
-            Pull your WordPress repository along with all pinned plugin submodules in one step.
-          </p>
+              Pull your WordPress repository along with all pinned plugin submodules in one step.
+            </p>
             <div class="snippet">
               <div class="snippet-head">
                 <span class="guide-os-label">Shell</span>
@@ -266,10 +282,10 @@
           </article>
 
           <article class="guide-block">
-            <h3>3. Switch a Submodule to a Specific Release Tag</h3>
+            <h3>4. Switch a Submodule to a Specific Release Tag</h3>
             <p class="muted">
-            Pin production deployments to an immutable WordPress.org release tag instead of tracking <code>trunk</code>.
-          </p>
+              Pin production deployments to an immutable WordPress.org release tag instead of tracking <code>trunk</code>.
+            </p>
             <div class="snippet">
               <div class="snippet-head">
                 <span class="guide-os-label">Shell</span>
@@ -281,19 +297,55 @@
           </article>
 
           <article id="composer" class="guide-block">
-            <h3>4. Composer &amp; Prerequisites</h3>
+            <h3>5. Use with Composer (<code>composer.json</code>)</h3>
             <p class="muted">
-              Quickly install <code>git</code> on your machine if missing, or reference any
-              <code>WPPlugins/&lt;slug&gt;</code> mirror directly in <code>composer.json</code>
-              via a <code>vcs</code> or <code>package</code> repository entry.
+              Because most WordPress.org plugins do not ship a <code>composer.json</code>, declare a
+              <code>package</code> repository pointing at <code>WPPlugins/&lt;slug&gt;</code> together
+              with <code>composer/installers</code> so Composer installs plugins directly into
+              <code>wp-content/plugins/</code>.
             </p>
             <div class="snippet">
               <div class="snippet-head">
-                <span class="guide-os-label">Install Git</span>
-                <button class="copy-btn" data-target="guide-install"
+                <span>composer.json</span>
+                <button class="copy-btn" data-target="guide-composer-json"
                   type="button">Copy</button>
               </div>
-              <pre><code id="guide-install"></code></pre>
+              <pre><code id="guide-composer-json">{
+  "repositories": [
+    {
+      "type": "package",
+      "package": {
+        "name": "wpplugins/&lt;slug&gt;",
+        "version": "1.2.3",
+        "type": "wordpress-plugin",
+        "source": {
+          "url": "https://github.com/WPPlugins/&lt;slug&gt;.git",
+          "type": "git",
+          "reference": "1.2.3"
+        },
+        "require": {
+          "composer/installers": "^2.0"
+        }
+      }
+    }
+  ],
+  "require": {
+    "wpplugins/&lt;slug&gt;": "1.2.3"
+  },
+  "extra": {
+    "installer-paths": {
+      "wp-content/plugins/{$name}/": ["type:wordpress-plugin"]
+    }
+  }
+}</code></pre>
+            </div>
+            <div class="snippet" style="margin-top: 0.75rem;">
+              <div class="snippet-head">
+                <span>Install with Composer</span>
+                <button class="copy-btn" data-target="guide-composer-cmd"
+                  type="button">Copy</button>
+              </div>
+              <pre><code id="guide-composer-cmd">composer install</code></pre>
             </div>
           </article>
         </div>
