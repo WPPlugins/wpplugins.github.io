@@ -71,7 +71,7 @@ git submodule add https://github.com/WPPlugins/<slug>.git wp-content/plugins/<sl
   ]
 }
 ```
-Note: Many WordPress.org plugins do not ship a `composer.json`. For Composer dependency resolution, pair with WPackagist (`https://wpackagist.org/`) or define a `type: package` entry pointing to the desired tag/archive.
+Note: Many WordPress.org plugins do not ship a `composer.json`. If a plugin lacks one, define a Composer `type: package` repository entry in your `composer.json` pointing to `https://github.com/WPPlugins/<slug>.git` (or its tag archive) with `"type": "wordpress-plugin"`.
 
 ## 5. Limitations & Policies
 
